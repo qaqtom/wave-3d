@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        .can-container {
+            /* position: absolute;
+            left: 0;
+            top: 0; */
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas {
+            border: 1px solid;
+        }
+    </style>
+    <style>
+        .box {
+            width: 250px;
+            height: 250px;
+            border: 1px dashed red;
+            margin: 100px auto;
+            position: absolute;
+            border-radius: 50%;
+            transform-style: preserve-3d;
+            animation: gun 8s linear infinite;
+            left: 40%;
+        }
+
+        .box>div {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            text-align: center;
+            line-height: 250px;
+            font-size: 60px;
+            color: #daa520;
+        }
+
+        .left {
+            background-color: rgba(255, 0, 0, 0.3);
+            transform-origin: left;
+            transform: rotateY(90deg) translateX(-125px);
+        }
+
+        .right {
+            background: rgba(0, 0, 255, 0.3);
+            transform-origin: right;
+            /* 变换*/
+            transform: rotateY(90deg) translateX(125px);
+        }
+
+        .forward {
+            background: rgba(255, 255, 0, 0.3);
+            transform: translateZ(125px);
+        }
+
+        .back {
+            background: rgba(0, 255, 255, 0.3);
+            transform: translateZ(-125px);
+        }
+
+        .up {
+            background: rgba(255, 0, 255, 0.3);
+            transform: rotateX(90deg) translateZ(125px);
+        }
+
+        .down {
+            background: rgba(99, 66, 33, 0.3);
+            transform: rotateX(-90deg) translateZ(125px);
+        }
+
+        @keyframes gun {
+            0% {
+                transform: rotateX(0deg) rotateY(0deg);
+            }
+
+            100% {
+                transform: rotateX(360deg) rotateY(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="box">
+            <div class="up">上</div>
+            <div class="down">下</div>
+            <div class="left">左</div>
+            <div class="right">右</div>
+            <div class="forword">前</div>
+            <div class="back">后</div>
+        </div>
+        <div class="can-container">
+            <canvas id="can"></canvas>
+        </div>
+
+    </div>
+
+
+    <script>
+        let viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+        let viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+
+        let width = viewportWidth; //宽度
+        let height = viewportHeight; //高度
+        let offset = 0; //位移
+        let num = 0; //正弦函数
+        let expand = 200; //震动的高度
+        let canvas = document.querySelector('#can');
+        let ctx = canvas.getContext('2d');
+        // 创建线性渐变对象
+        let gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, 'rgb(115, 255, 222)');
+        gradient.addColorStop(1, 'rgb(0, 92, 230)');
+        //---------------------------------------------------------------------------------------------------------------------------
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                resizeCanvas();
+            }, 250); // 根据需要调整延迟时间
+        });
+        //动画函数
+        function resizeCanvas() {
+            viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+            viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+
+            width = viewportWidth;
+            height = viewportHeight;
+            canvas.width = viewportWidth;
+            canvas.height = viewportHeight;
+
+
+            setInterval(() => {
+                ctx.clearRect(0, 0, width, height);
+
+                ctx.beginPath();
+
+                ctx.moveTo(0 + offset - width, height / 2);
+                ctx.quadraticCurveTo(width / 4 + offset - width, height / 2 + Math.sin(num) * expand,
+                    width / 2 + offset - width, height / 2);
+                ctx.quadraticCurveTo(width / 4 * 3 + offset - width, height / 2 - Math.sin(num) * expand,
+                    width + offset - width, height / 2);
+
+                ctx.moveTo(0 + offset, height / 2);
+                ctx.quadraticCurveTo(width / 4 + offset, height / 2 + Math.sin(num) * expand,
+                    width / 2 + offset, height / 2);
+                ctx.quadraticCurveTo(width / 4 * 3 + offset, height / 2 - Math.sin(num) * expand,
+                    width + offset, height / 2);
+
+
+                ctx.stroke();
+
+                offset += 10 + Math.random() * 60; //波浪移动的距离
+                offset %= width; //取余，防止波浪走了2*width步就全没了
+                num += 0.1; //正弦函数添加的补偿
+
+                // 填充矩形
+                ctx.fillStyle = gradient;
+                ctx.lineTo(width, height);
+                ctx.lineTo(0, height);
+                ctx.lineTo(0, height / 2);
+                ctx.closePath();
+                ctx.fill();
+            }, 1000 / 30)
+        }
+        resizeCanvas();
+    </script>
+</body>
+
+</html>
